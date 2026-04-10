@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HandScanner</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background: linear-gradient(135deg, #0d6efd, #6610f2);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            border: none;
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        #webcam-container canvas {
+            border-radius: 15px;
+            border: 3px solid #0d6efd;
+        }
+
+        .btn-start {
+            font-size: 1.2rem;
+            padding: 12px 30px;
+            border-radius: 50px;
+            background: linear-gradient(45deg, #198754, #20c997);
+            border: none;
+            transition: 0.3s;
+        }
+
+        .btn-start:hover {
+            transform: scale(1.05);
+            background: linear-gradient(45deg, #157347, #1aa179);
+        }
+
+        .progress {
+            height: 25px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container text-center">
+    <div class="card shadow-lg bg-white text-dark">
+        <h2 class="mb-3">🤖 HandScanner</h2>
+        <p class="text-muted">Clique no botão abaixo para permitir acesso à câmera</p>
+
+        <button class="btn btn-start mb-4 text-white" onclick="init()">
+            📷 Ativar Câmera
+        </button>
+
+        <div id="webcam-container" class="mb-4"></div>
+
+        <div id="label-container" class="text-start"></div>
+    </div>
+</div>
+
+<!-- TensorFlow + Teachable Machine -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+<script>
+    const URL = "https://teachablemachine.withgoogle.com/models/CVYxyQxCDX/";
+
+    let model, webcam, labelContainer, maxPredictions;
+
+    async function init() {
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
+
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+
+        const flip = true;
+        webcam = new tmImage.Webcam(300, 300, flip);
+        await webcam.setup();
+        await webcam.play();
+        window.requestAnimationFrame(loop);
+
+        document.getElementById("webcam-container").innerHTML = "";
+        document.getElementById("webcam-container").appendChild(webcam.canvas);
+
+        labelContainer = document.getElementById("label-container");
+        labelContainer.innerHTML = "";
+
+        for (let i = 0; i < maxPredictions; i++) {
+            const wrapper = document.createElement("div");
+            wrapper.classList.add("mb-3");
+
+            const label = document.createElement("div");
+            label.classList.add("fw-bold");
+
+            const progress = document.createElement("div");
+            progress.classList.add("progress");
+
+            const bar = document.createElement("div");
+            bar.classList.add("progress-bar", "bg-success");
+            bar.style.width = "0%";
+            bar.innerText = "0%";
+
+            progress.appendChild(bar);
+            wrapper.appendChild(label);
+            wrapper.appendChild(progress);
+
+            labelContainer.appendChild(wrapper);
+        }
+    }
+
+    async function loop() {
+        webcam.update();
+        await predict();
+        window.requestAnimationFrame(loop);
+    }
+
+    async function predict() {
+        const prediction = await model.predict(webcam.canvas);
+
+        for (let i = 0; i < maxPredictions; i++) {
+            const probability = (prediction[i].probability * 100).toFixed(0);
+
+            const wrapper = labelContainer.childNodes[i];
+            const label = wrapper.childNodes[0];
+            const bar = wrapper.childNodes[1].childNodes[0];
+
+            label.innerHTML = prediction[i].className;
+            bar.style.width = probability + "%";
+            bar.innerText = probability + "%";
+
+            // muda cor conforme confiança
+            bar.classList.remove("bg-success", "bg-warning", "bg-danger");
+
+            if (probability > 70) {
+                bar.classList.add("bg-success");
+            } else if (probability > 40) {
+                bar.classList.add("bg-warning");
+            } else {
+                bar.classList.add("bg-danger");
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
