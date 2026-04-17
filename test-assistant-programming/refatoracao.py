@@ -1,20 +1,31 @@
-def c(l):
-    t=0
-    for i in range(len(l)):
-        t=t+l[i]
-    m=t/len(l)
-    mx=l[0]
-    mn=l[0]
-    for i in range(len(l)):
-        if l[i]>mx:
-            mx=l[i]
-        if l[i]<mn:
-            mn=l[i]
-    return t,m,mx,mn
+from typing import Sequence, Tuple
 
-x=[23,7,45,2,67,12,89,34,56,11]
-a,b,c2,d=c(x)
-print("total:",a)
-print("media:",b)
-print("maior:",c2)
-print("menor:",d)
+
+def calcular_estatisticas(numeros: Sequence[float]) -> Tuple[float, float, float, float]:
+    """Retorna total, media, maior e menor valor de uma sequencia numerica."""
+    if not numeros:
+        raise ValueError("A lista de numeros nao pode ser vazia.")
+
+    total = 0.0
+    maior = numeros[0]
+    menor = numeros[0]
+
+    for valor in numeros:
+        total += valor
+        if valor > maior:
+            maior = valor
+        if valor < menor:
+            menor = valor
+
+    media = total / len(numeros)
+    return total, media, maior, menor
+
+
+if __name__ == "__main__":
+    valores = [23, 7, 45, 2, 67, 12, 89, 34, 56, 11]
+    total, media, maior, menor = calcular_estatisticas(valores)
+
+    print("total:", total)
+    print("media:", media)
+    print("maior:", maior)
+    print("menor:", menor)
