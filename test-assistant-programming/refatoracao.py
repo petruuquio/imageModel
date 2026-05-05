@@ -2,7 +2,21 @@ from typing import Sequence, Tuple
 
 
 def calcular_estatisticas(numeros: Sequence[float]) -> Tuple[float, float, float, float]:
-    """Retorna total, media, maior e menor valor de uma sequencia numerica."""
+    """Calcula estatísticas básicas de uma sequência numérica.
+
+    Args:
+        numeros (Sequence[float]): Sequência de números (não vazia).
+
+    Returns:
+        Tuple[float, float, float, float]: Tupla contendo (total, média, maior, menor).
+
+    Raises:
+        ValueError: Se `numeros` for vazia.
+
+    Examples:
+        >>> calcular_estatisticas([1, 2, 3])
+        (6.0, 2.0, 3, 1)
+    """
     if not numeros:
         raise ValueError("A lista de numeros nao pode ser vazia.")
 

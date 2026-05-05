@@ -2,7 +2,20 @@ from math import isqrt
 
 
 def is_primo(n: int) -> bool:
-	"""Retorna True quando `n` é primo, caso contrário retorna False."""
+	"""Verifica se um número é primo.
+
+	Args:
+		n (int): Número inteiro a ser testado.
+
+	Returns:
+		bool: `True` se `n` for primo, `False` caso contrário.
+
+	Examples:
+		>>> is_primo(7)
+		True
+		>>> is_primo(4)
+		False
+	"""
 	if n < 2:
 		return False
 	if n in (2, 3):
